@@ -333,6 +333,7 @@
             <div class="question-label">是否有銀行協商或呆帳？ *</div>
             <div class="yn" data-group="has_debt"><button class="choice" type="button" data-value="是">是</button><button class="choice" type="button" data-value="否">否</button></div>
             <div id="ynError" class="error">請完成所有財務狀況選項</div>
+            <div id="warningError" class="error">警示戶目前無法辦理，請先向銀行確認警示戶狀態，解除後再重新評估。</div>
           </div>
 
           <div id="submitError" class="error"></div>
@@ -548,8 +549,8 @@
         btn.classList.add('selected');
         state[group.dataset.group] = btn.dataset.value;
         document.getElementById('ynError').style.display = 'none';
-        if(group.dataset.group === 'is_warning' && btn.dataset.value === '是'){
-          showBlockedResult('');
+        if(group.dataset.group === 'is_warning'){
+          document.getElementById('warningError').style.display = btn.dataset.value === '是' ? 'block' : 'none';
         }
       });
     });
@@ -616,6 +617,7 @@
   function validateStep(){
     document.getElementById('amountError').style.display = 'none';
     document.getElementById('ynError').style.display = 'none';
+    document.getElementById('warningError').style.display = 'none';
     document.getElementById('submitError').style.display = 'none';
     const form = document.getElementById('loanForm');
     if(currentStep === 1){
@@ -640,7 +642,7 @@
     const ok = requiredYn.every(key => state[key]);
     if(!ok) document.getElementById('ynError').style.display = 'block';
     if(state.is_warning === '是'){
-      showBlockedResult(String(form.elements.name.value || '').trim());
+      document.getElementById('warningError').style.display = 'block';
       return false;
     }
     return ok;
@@ -651,7 +653,7 @@
     const form = document.getElementById('loanForm');
     const data = Object.fromEntries(new FormData(form).entries());
     if(state.is_warning === '是'){
-      showBlockedResult(String(data.name || '').trim());
+      document.getElementById('warningError').style.display = 'block';
       return;
     }
     const leadId = createLeadId();
